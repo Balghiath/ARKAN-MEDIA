@@ -7,168 +7,16 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   /* -------------------------------------------------------------------------- */
-  /* 1. Splash Screen Preloader & Audio Engine (Fade-out Audio & Direct Timing)   */
+  /* 1. Splash Screen Preloader (No Audio)                                        */
   /* -------------------------------------------------------------------------- */
   const preloader = document.getElementById("preloader");
 
   if (preloader) {
-    let preloaderHidden = false;
-    let fallbackTimer = null;
-    let fadeOutTimer = null;
-    let isAudioPlaying = false;
-    let isFadingOut = false;
-
-    // Load Audio for Arkan Media Splash Screen
-    const splashAudio = new Audio("Audio/arkan.mp3");
-    splashAudio.preload = "auto";
-
-    // Smooth Audio Fade-Out Function
-    const fadeOutAudio = (audio, durationMs = 1200, callback) => {
-      if (!audio || audio.paused || isFadingOut) {
-        if (callback) callback();
-        return;
-      }
-      isFadingOut = true;
-      const startVolume = audio.volume || 1.0;
-      const steps = 24;
-      const stepTime = durationMs / steps;
-      const volumeStep = startVolume / steps;
-      let step = 0;
-
-      const fadeInterval = setInterval(() => {
-        step++;
-        const newVol = Math.max(0, startVolume - volumeStep * step);
-        audio.volume = newVol;
-
-        if (step >= steps || newVol <= 0) {
-          clearInterval(fadeInterval);
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = 1.0; // Reset for future play
-          isAudioPlaying = false;
-          isFadingOut = false;
-          if (callback) callback();
-        }
-      }, stepTime);
-    };
-
-    // Function to hide preloader and STOP/Fade-out audio completely
-    // removeAudioListeners is declared at outer scope, assigned later when audio events are set up
-    let removeAudioListeners = () => {}; // safe no-op default
-
-    const hidePreloader = () => {
-      if (preloaderHidden) return;
-      preloaderHidden = true;
-
-      // Start audio fade out smoothly when splash disappears
-      if (splashAudio && !splashAudio.paused) {
-        fadeOutAudio(splashAudio, 1000, () => {
-          preloader.classList.add("fade-out");
-        });
-      } else {
-        preloader.classList.add("fade-out");
-      }
-
-      removeAudioListeners();
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-      if (fadeOutTimer) clearTimeout(fadeOutTimer);
-    };
-
-    // Function to start playing audio
-    const startAudio = () => {
-      if (!splashAudio || isAudioPlaying || preloaderHidden || isFadingOut)
-        return;
-      const playPromise = splashAudio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            isAudioPlaying = true;
-          })
-          .catch((err) => {
-            console.log("Autoplay waiting for user gesture:", err);
-            isAudioPlaying = false;
-          });
-      }
-    };
-
-    // Calculate Splash Screen duration IMMEDIATELY from DOM/Page appearance load time
-    const DEFAULT_SPLASH_MS = 5500;
-    const FADE_LEAD_MS = 1200; // start fade out 1.2s before preloader closes
-
-    const setupSplashDuration = () => {
-      let totalMs = DEFAULT_SPLASH_MS;
-      if (
-        splashAudio.duration &&
-        !isNaN(splashAudio.duration) &&
-        splashAudio.duration > 0
-      ) {
-        totalMs = Math.ceil((splashAudio.duration + 1) * 1000);
-      }
-
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-      if (fadeOutTimer) clearTimeout(fadeOutTimer);
-
-      // 1. Schedule smooth audio fade-out before splash ends
-      const fadeStartMs = Math.max(500, totalMs - FADE_LEAD_MS);
-      fadeOutTimer = setTimeout(() => {
-        if (!preloaderHidden && splashAudio && !splashAudio.paused) {
-          fadeOutAudio(splashAudio, FADE_LEAD_MS);
-        }
-      }, fadeStartMs);
-
-      // 2. Schedule hiding preloader when total duration expires
-      fallbackTimer = setTimeout(() => {
-        hidePreloader();
-      }, totalMs);
-    };
-
-    if (splashAudio) {
-      splashAudio.addEventListener("loadedmetadata", setupSplashDuration);
-      splashAudio.addEventListener("canplaythrough", setupSplashDuration);
-      if (splashAudio.readyState >= 1) {
-        setupSplashDuration();
-      }
-
-      startAudio();
-
-      const audioEvents = [
-        "mousemove",
-        "touchmove",
-        "touchstart",
-        "click",
-        "pointerdown",
-        "mousedown",
-        "pointermove",
-      ];
-
-      const handleSplashGesture = () => {
-        if (!preloaderHidden && !isAudioPlaying && !isFadingOut) {
-          startAudio();
-        }
-      };
-
-      // Reassign to the real implementation now that handleSplashGesture is available
-      removeAudioListeners = () => {
-        audioEvents.forEach((evt) => {
-          window.removeEventListener(evt, handleSplashGesture);
-          document.removeEventListener(evt, handleSplashGesture);
-          preloader.removeEventListener(evt, handleSplashGesture);
-        });
-      };
-
-      audioEvents.forEach((evt) => {
-        window.addEventListener(evt, handleSplashGesture, { passive: true });
-        document.addEventListener(evt, handleSplashGesture, { passive: true });
-        preloader.addEventListener(evt, handleSplashGesture, { passive: true });
-      });
-
-      splashAudio.addEventListener("ended", () => {
-        isAudioPlaying = false;
-        hidePreloader();
-      });
-    }
-
-    setupSplashDuration();
+    const DEFAULT_SPLASH_MS = 5000;
+    
+    setTimeout(() => {
+      preloader.classList.add("fade-out");
+    }, DEFAULT_SPLASH_MS);
   }
 
   /* -------------------------------------------------------------------------- */
@@ -392,9 +240,69 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Date Enforcement Logic: Lock package select and buttons until date is picked
+  const eventDateInput = document.getElementById("eventDate");
+  const dateLockWarning = document.getElementById("dateLockWarning");
+  const packagesDateNotice = document.getElementById("packagesDateNotice");
+
+  function handleDateLockState() {
+    if (!selectedPackageSelect) return;
+    const isEn = document.documentElement.getAttribute("data-lang") === "en";
+    const hasDate = Boolean(eventDateInput && eventDateInput.value);
+    selectedPackageSelect.disabled = !hasDate;
+
+    if (dateLockWarning) {
+      dateLockWarning.style.display = hasDate ? "none" : "block";
+    }
+
+    if (packagesDateNotice) {
+      if (hasDate) {
+        packagesDateNotice.style.background = "rgba(76, 217, 100, 0.15)";
+        packagesDateNotice.style.borderColor = "#4cd964";
+        packagesDateNotice.style.color = "#4cd964";
+        packagesDateNotice.innerHTML = `
+          <i class="fa-solid fa-circle-check" style="font-size: 1.1rem; color: #4cd964;"></i>
+          <span>${isEn ? `Event date set: <strong>${eventDateInput.value}</strong>. Packages unlocked!` : `تم تحديد تاريخ الفعالية: <strong>${eventDateInput.value}</strong>. تم فتح الباقات بنجاح!`}</span>
+        `;
+      } else {
+        packagesDateNotice.style.background = "rgba(220, 53, 69, 0.15)";
+        packagesDateNotice.style.borderColor = "var(--brand-red)";
+        packagesDateNotice.style.color = "#ff6b6b";
+        packagesDateNotice.innerHTML = `
+          <i class="fa-solid fa-lock" style="font-size: 1.1rem; color: var(--brand-red);"></i>
+          <span data-i18n="packages.date_notice">${isEn ? "Important Notice: You must select the event date first in the booking form below to unlock available packages" : "ملاحظة هامة: يجب تحديد تاريخ الفعالية أولاً في نموذج الحجز بالأسفل لفتح باقات الأسعار المتاحة للحجز"}</span>
+        `;
+      }
+    }
+  }
+
+  if (eventDateInput) {
+    eventDateInput.addEventListener("change", handleDateLockState);
+    eventDateInput.addEventListener("input", handleDateLockState);
+    handleDateLockState();
+  }
+
   // Package select button click handler
   document.querySelectorAll(".select-pkg-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
+      const isEn = document.documentElement.getAttribute("data-lang") === "en";
+      if (!eventDateInput || !eventDateInput.value) {
+        e.preventDefault();
+        showToast(
+          isEn
+            ? "Please select the event date first in the booking form below to unlock packages!"
+            : "الرجاء تحديد تاريخ الفعالية أولاً في نموذج الحجز بالأسفل لفتح إمكانية حجز الباقة!"
+        );
+        if (eventDateInput) {
+          eventDateInput.focus();
+          eventDateInput.classList.add("date-input-highlight");
+          setTimeout(() => eventDateInput.classList.remove("date-input-highlight"), 3600);
+          const yOffset = -120;
+          const y = eventDateInput.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+        return;
+      }
       const pkgName = btn.getAttribute("data-package");
       if (selectedPackageSelect && pkgName) {
         for (let i = 0; i < selectedPackageSelect.options.length; i++) {
@@ -543,6 +451,21 @@ document.addEventListener("DOMContentLoaded", () => {
     applyAddonsBtn.addEventListener("click", () => {
       const isEn = document.documentElement.getAttribute("data-lang") === "en";
       
+      if (!eventDateInput || !eventDateInput.value) {
+        showToast(
+          isEn
+            ? "Please select the event date first!"
+            : "الرجاء تحديد تاريخ الفعالية أولاً!"
+        );
+        if (eventDateInput) {
+          eventDateInput.focus();
+          const yOffset = -100;
+          const y = eventDateInput.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+        return;
+      }
+
       if (formAddonsDisplay && formAddonsList) {
         if (selectedAddons.length > 0) {
           formAddonsDisplay.style.display = "block";
@@ -598,6 +521,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const location = document.getElementById("eventLocation").value;
       const pkg = document.getElementById("selectedPackage").value;
       const notes = document.getElementById("bookingNotes").value.trim();
+      const bankReceiptInput = document.getElementById("bankReceipt");
+      const bankReceiptFile = bankReceiptInput && bankReceiptInput.files.length > 0 ? bankReceiptInput.files[0] : null;
 
       if (!name || !phone || !date) {
         showToast(
@@ -605,6 +530,19 @@ document.addEventListener("DOMContentLoaded", () => {
             ? "Please fill in required fields (Name, Phone, Date)"
             : "يرجى تعبئة جميع الحقول المطلوبة (الاسم، الجوال، التاريخ)",
         );
+        if (!date && eventDateInput) {
+          eventDateInput.focus();
+        }
+        return;
+      }
+
+      if (!bankReceiptFile) {
+        showToast(
+          isEn
+            ? "Please attach the bank transfer receipt image!"
+            : "يرجى إرفاق صورة سند التحويل البنكي للتأكيد!",
+        );
+        if (bankReceiptInput) bankReceiptInput.focus();
         return;
       }
 
@@ -635,9 +573,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${selectedAddons.length > 0 ? selectedAddons.map((a) => `<p>• ${a.name} (+${a.price} SAR)</p>`).join("") : "<p>No add-ons selected</p>"}
               </div>
             </div>
+            <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--card-border); padding-bottom: 10px;">
+              <p><strong>📄 Bank Transfer Receipt:</strong> <span style="color: #4cd964;">File Selected (${bankReceiptFile.name})</span></p>
+            </div>
             ${notes ? `<p style="margin-bottom: 10px;"><strong>📝 Notes:</strong> ${notes}</p>` : ""}
             <div style="font-size: 1.25rem; font-weight: 800; color: var(--brand-gold); text-align: center; margin-top: 15px; padding: 10px; background: rgba(212,175,55,0.1); border-radius: 8px;">
               Estimated Base Cost: ${grandTotal.toLocaleString()} SAR
+            </div>
+            <div style="margin-top: 15px; padding: 12px 15px; background: rgba(220, 53, 69, 0.15); border: 1px solid var(--brand-red); border-radius: 8px; color: #ff6b6b; font-size: 0.88rem; line-height: 1.5; text-align: center;">
+              <i class="fa-solid fa-triangle-exclamation" style="margin-right: 5px;"></i>
+              <strong>IMPORTANT:</strong> Receipt attached in form. Please remember to <strong>manually attach your bank receipt image in the WhatsApp chat</strong> after it opens to complete booking.
             </div>
           `;
         } else {
@@ -655,9 +600,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${selectedAddons.length > 0 ? selectedAddons.map((a) => `<p>• ${a.name} (+${a.price} ر.س)</p>`).join("") : "<p>لا يوجد إضافات</p>"}
               </div>
             </div>
+            <div style="margin-bottom: 12px; border-bottom: 1px dashed var(--card-border); padding-bottom: 10px;">
+              <p><strong>📄 سند التحويل البنكي:</strong> <span style="color: #4cd964;">تم إرفاق الملف (${bankReceiptFile.name})</span></p>
+            </div>
             ${notes ? `<p style="margin-bottom: 10px;"><strong>📝 ملاحظات:</strong> ${notes}</p>` : ""}
             <div style="font-size: 1.25rem; font-weight: 800; color: var(--brand-gold); text-align: center; margin-top: 15px; padding: 10px; background: rgba(212,175,55,0.1); border-radius: 8px;">
               الإجمالي التقديري المبسط: ${grandTotal.toLocaleString()} ريال
+            </div>
+            <div style="margin-top: 15px; padding: 12px 15px; background: rgba(220, 53, 69, 0.15); border: 1px solid var(--brand-red); border-radius: 8px; color: #ff6b6b; font-size: 0.88rem; line-height: 1.5; text-align: center;">
+              <i class="fa-solid fa-triangle-exclamation" style="margin-left: 5px;"></i>
+              <strong>تنبيه هام جداً:</strong> تم إرفاق سند التحويل. نرجو منك <strong>إرسال صورة الحوالة يدوياً داخل محادثة الواتساب</strong> بعد الانتقال إليها لتأكيد الحجز.
             </div>
           `;
         }
@@ -671,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `📍 *المكان:* ${location}\n` +
         `📦 *الباقة:* ${pkg}\n` +
         `✨ *الإضافات:* \n${addonsText}\n` +
+        `📎 *صورة سند التحويل البنكي:* مرفق في الطلب (${bankReceiptFile.name}) - وسأقوم بإرسال الصورة هنا في المحادثة يدوياً\n` +
         (notes ? `📝 *ملاحظات:* ${notes}\n` : "") +
         `\n💰 *إجمالي الفاتورة التقديرية:* ${grandTotal.toLocaleString()} ريال سعودي\n\n` +
         `أرجو إفادتي بتأكيد الحوافظ وتكلفة سفر الطاقم (إن وجدت). شكراً لكم!`;
@@ -742,4 +695,85 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => toast.remove(), 400);
     }, 3000);
   }
+
+  /* -------------------------------------------------------------------------- */
+  /* 11. 3D Aesthetic Engine (Scroll Reveal & Mouse Tilt)                      */
+  /* -------------------------------------------------------------------------- */
+  
+  // A. Scroll Reveal Observer
+  const revealElements = document.querySelectorAll('.reveal-3d');
+  
+  const revealOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px"
+  };
+  
+  const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, revealOptions);
+  
+  revealElements.forEach(el => {
+    if (el.closest('#addons') || el.closest('#booking') || el.classList.contains('no-3d')) {
+      el.classList.add('active');
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    } else {
+      revealOnScroll.observe(el);
+    }
+  });
+
+  // B. 3D Hover & Touch Tilt Effect
+  const cards3D = document.querySelectorAll('.glass-card');
+  
+  cards3D.forEach(card => {
+    if (card.closest('#addons') || card.closest('#booking') || card.classList.contains('no-3d')) {
+      card.style.transform = 'none';
+      return;
+    }
+
+    // Shared tilt logic
+    const handleTilt = (e) => {
+      card.classList.remove('glass-card-3d-reset');
+      card.classList.add('glass-card-3d-tilt');
+
+      // Get bounding rect
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      
+      if(x === undefined || y === undefined) return;
+
+      // Calculate mouse/touch position relative to center of card
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const mouseX = x - centerX;
+      const mouseY = y - centerY;
+      
+      // Calculate rotation (max 12 degrees)
+      const rotateX = ((mouseY / (rect.height / 2)) * -12).toFixed(2);
+      const rotateY = ((mouseX / (rect.width / 2)) * 12).toFixed(2);
+      
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    };
+    
+    const resetTilt = () => {
+      card.classList.remove('glass-card-3d-tilt');
+      card.classList.add('glass-card-3d-reset');
+      card.style.transform = '';
+    };
+
+    // Mouse events
+    card.addEventListener('mousemove', handleTilt);
+    card.addEventListener('mouseleave', resetTilt);
+    
+    // Touch events
+    card.addEventListener('touchmove', handleTilt, { passive: true });
+    card.addEventListener('touchend', resetTilt);
+  });
+
 });
