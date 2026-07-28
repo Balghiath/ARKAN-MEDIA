@@ -244,6 +244,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const eventDateInput = document.getElementById("eventDate");
   const dateLockWarning = document.getElementById("dateLockWarning");
   const packagesDateNotice = document.getElementById("packagesDateNotice");
+  const selectPkgBtns = document.querySelectorAll(".select-pkg-btn");
+
+  // Save original button content for restoration
+  selectPkgBtns.forEach((btn) => {
+    if (!btn.hasAttribute("data-original-html")) {
+      btn.setAttribute("data-original-html", btn.innerHTML);
+    }
+  });
 
   function handleDateLockState() {
     if (!selectedPackageSelect) return;
@@ -274,20 +282,36 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       }
     }
+
+    // Update package card action buttons visually across all devices (Mobile / Tablet / Desktop)
+    selectPkgBtns.forEach((btn) => {
+      if (!hasDate) {
+        btn.classList.add("btn-locked-state");
+        btn.innerHTML = `<i class="fa-solid fa-lock" style="color: #ff6b6b; margin-left: 5px;"></i> <span>${isEn ? "Select Event Date First" : "حدد تاريخ الفعالية أولاً للحجز"}</span>`;
+      } else {
+        btn.classList.remove("btn-locked-state");
+        const originalHtml = btn.getAttribute("data-original-html");
+        if (originalHtml) {
+          btn.innerHTML = originalHtml;
+        }
+      }
+    });
   }
 
   if (eventDateInput) {
-    eventDateInput.addEventListener("change", handleDateLockState);
-    eventDateInput.addEventListener("input", handleDateLockState);
+    ["change", "input", "blur", "focus", "keyup"].forEach((evt) => {
+      eventDateInput.addEventListener(evt, handleDateLockState);
+    });
     handleDateLockState();
   }
 
-  // Package select button click handler
-  document.querySelectorAll(".select-pkg-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+  // Package select button click & touch handler (Mobile, Tablet, Desktop)
+  selectPkgBtns.forEach((btn) => {
+    const handlePkgSelectClick = (e) => {
       const isEn = document.documentElement.getAttribute("data-lang") === "en";
       if (!eventDateInput || !eventDateInput.value) {
         e.preventDefault();
+        e.stopPropagation();
         showToast(
           isEn
             ? "Please select the event date first in the booking form below to unlock packages!"
@@ -301,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const y = eventDateInput.getBoundingClientRect().top + window.scrollY + yOffset;
           window.scrollTo({ top: y, behavior: "smooth" });
         }
-        return;
+        return false;
       }
       const pkgName = btn.getAttribute("data-package");
       if (selectedPackageSelect && pkgName) {
@@ -318,7 +342,14 @@ document.addEventListener("DOMContentLoaded", () => {
         updateEstimatedTotalPrice();
         showToast(`تم اختيار ${pkgName.split(" - ")[0]}`);
       }
-    });
+    };
+
+    btn.addEventListener("click", handlePkgSelectClick);
+    btn.addEventListener("touchstart", (e) => {
+      if (!eventDateInput || !eventDateInput.value) {
+        handlePkgSelectClick(e);
+      }
+    }, { passive: false });
   });
 
   /* -------------------------------------------------------------------------- */

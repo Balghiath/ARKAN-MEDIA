@@ -1926,3 +1926,54 @@ body {
   0% { box-shadow: 0 0 5px var(--brand-gold); border-color: var(--brand-gold); }
   100% { box-shadow: 0 0 30px var(--brand-gold); border-color: #ffffff; }
 }
+
+/* Locked State for Package Action Buttons */
+.btn-locked-state {
+  background: rgba(220, 53, 69, 0.12) !important;
+  border-color: rgba(220, 53, 69, 0.6) !important;
+  color: #ff6b6b !important;
+  opacity: 0.9 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.btn-locked-state:hover {
+  background: rgba(220, 53, 69, 0.25) !important;
+  border-color: var(--brand-red) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/* Responsive Mobile & Tablet Adjustments for Date Enforcement & Forms */
+@media (max-width: 768px) {
+  .packages-date-notice-banner {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 10px 14px !important;
+    font-size: 0.85rem !important;
+    margin: 12px 0 20px !important;
+  }
+
+  .btn-locked-state {
+    font-size: 0.85rem !important;
+    padding: 10px 14px !important;
+  }
+
+  .toast-container {
+    left: 15px !important;
+    right: 15px !important;
+    bottom: 20px !important;
+    width: auto !important;
+  }
+
+  .toast {
+    font-size: 0.85rem !important;
+    padding: 12px 16px !important;
+    text-align: center !important;
+  }
+
+  .form-input, .form-textarea {
+    font-size: 0.95rem !important;
+    padding: 12px 14px !important;
+  }
+}
