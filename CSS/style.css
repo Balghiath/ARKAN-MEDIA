@@ -2377,6 +2377,12 @@ body {
 .video-player-wrap video {
   width:100%; height:100%; object-fit:contain; display:block; background:#000;
 }
+video::-internal-media-controls-download-button {
+  display: none !important;
+}
+video::-webkit-media-controls-enclosure {
+  overflow: hidden;
+}
 .video-play-overlay {
   position: absolute; inset: 0;
   background: rgba(0,0,0,0.42);

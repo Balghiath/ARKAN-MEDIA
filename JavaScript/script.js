@@ -998,6 +998,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const expanded = document.getElementById("photo-expanded");
           if (expanded) expanded.classList.add("active");
+
+          // Smooth scroll to top of photo gallery section
+          const sec = document.getElementById("photo-gallery");
+          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 300);
       }, 380);
     };
@@ -1068,6 +1072,9 @@ document.addEventListener("DOMContentLoaded", () => {
       currentCat = null;
       const grid = document.getElementById("photo-grid");
       if (grid) grid.innerHTML = "";
+
+      const sec = document.getElementById("photo-gallery");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     const init = () => {
@@ -1131,6 +1138,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const expanded = document.getElementById("promo-expanded");
           if (expanded) expanded.classList.add("active");
+
+          // Smooth scroll to top of promo gallery section
+          const sec = document.getElementById("promo-gallery");
+          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 300);
       }, 380);
     };
@@ -1164,6 +1175,9 @@ document.addEventListener("DOMContentLoaded", () => {
         video.controls = true;
         video.preload = "metadata";
         video.setAttribute("playsinline", "");
+        video.setAttribute("controlsList", "nodownload noremoteplayback");
+        video.setAttribute("disablePictureInPicture", "");
+        video.addEventListener("contextmenu", e => e.preventDefault());
 
         const overlay = document.createElement("div");
         overlay.className = "video-play-overlay";
@@ -1230,6 +1244,9 @@ document.addEventListener("DOMContentLoaded", () => {
       currentPcat = null;
       const grid = document.getElementById("promo-grid");
       if (grid) grid.innerHTML = "";
+
+      const sec = document.getElementById("promo-gallery");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     const init = () => {
