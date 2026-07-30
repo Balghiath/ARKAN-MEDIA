@@ -997,11 +997,10 @@ document.addEventListener("DOMContentLoaded", () => {
           renderPhotoGrid(data);
 
           const expanded = document.getElementById("photo-expanded");
-          if (expanded) expanded.classList.add("active");
-
-          // Smooth scroll to top of photo gallery section
-          const sec = document.getElementById("photo-gallery");
-          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (expanded) {
+            expanded.classList.add("active");
+            expanded.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         }, 300);
       }, 380);
     };
@@ -1137,11 +1136,10 @@ document.addEventListener("DOMContentLoaded", () => {
           renderVideoGrid(data);
 
           const expanded = document.getElementById("promo-expanded");
-          if (expanded) expanded.classList.add("active");
-
-          // Smooth scroll to top of promo gallery section
-          const sec = document.getElementById("promo-gallery");
-          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (expanded) {
+            expanded.classList.add("active");
+            expanded.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         }, 300);
       }, 380);
     };
