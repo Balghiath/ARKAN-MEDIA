@@ -807,4 +807,452 @@ document.addEventListener("DOMContentLoaded", () => {
     card.addEventListener('touchend', resetTilt);
   });
 
+  /* ======================================================================
+     GALLERY CONTENT CONFIG — بيانات الصور والفيديوهات
+     أضف أسماء الملفات هنا عند إضافة محتوى جديد
+     الصور: images/<category>/<filename>
+     الفيديو: promo/<category>/<filename>
+     ====================================================================== */
+  const GALLERY_DATA = {
+    malika: {
+      label: "ملكة",
+      icon: "👑",
+      path: "images/malika/",
+      images: [
+        "DSC090133.png","DSC09014.png","DSC09025.png","DSC09031.png",
+        "DSC09046.png","DSC09069.png","DSC09085.png","MMK04021.png",
+        "MMK04089.png","MMK04241.png","MMK04248.png","MMK04279.png",
+        "MMK04284.png","MMK04393.png"
+      ]
+    },
+    arsan: {
+      label: "صور عرسان",
+      icon: "💍",
+      path: "images/arsan/",
+      images: [
+        "MMK02712.png","MMK02718.png","MMK02743.png","MMK02748.png",
+        "untitled-105.png","untitled-34.png","untitled-60.png",
+        "untitled-81.png","untitled-86.png"
+      ]
+    },
+    hafla: {
+      label: "حفل زفاف",
+      icon: "💒",
+      path: "images/hafla/",
+      images: [
+        "MMK02803.png","MMK02804.png","MMK02808.png","MMK02809.png",
+        "MMK02815.png","MMK02816.png","MMK02853.png",
+        "untitled-227.png","untitled-228.png","untitled-96.png"
+      ]
+    }
+  };
+
+  const PROMO_DATA = {
+    e3lanat: {
+      label: "إعلانات",
+      path: "promo/e3lanat/",
+      videos: [
+        { file: "e3lanat 1.mp4", title: "إعلان 1" },
+        { file: "e3lanat 2.mp4", title: "إعلان 2" }
+      ]
+    },
+    hafla_zafaf: {
+      label: "حفل زفاف",
+      path: "promo/hafla_zafaf/",
+      videos: [
+        { file: "arkan.mov", title: "فيلم أركان - حفل زفاف" }
+      ]
+    },
+    kibar_shakhsiyat: {
+      label: "كبار الشخصيات",
+      path: "promo/kibar_shakhsiyat/",
+      videos: [
+        { file: "dr Ibrahim.mp4", title: "د. إبراهيم" }
+      ]
+    },
+    aflam: {
+      label: "أفلام",
+      path: "promo/aflam/",
+      videos: [
+        { file: "aflam.mp4", title: "فيلم أركان ميديا" }
+      ]
+    }
+  };
+
+  /* ======================================================================
+     LIGHTBOX MANAGER
+     ====================================================================== */
+  const LightboxManager = (() => {
+    let lb, img, counter, currentImages, currentIndex;
+
+    const open = (images, index) => {
+      currentImages = images;
+      currentIndex = index;
+      lb  = lb  || document.getElementById("lightbox");
+      img = img || document.getElementById("lightbox-img");
+      counter = counter || document.getElementById("lb-counter");
+      if (!lb || !img) return;
+      img.src = currentImages[currentIndex];
+      lb.classList.add("open");
+      updateCounter();
+      document.body.style.overflow = "hidden";
+    };
+
+    const close = () => {
+      if (lb) lb.classList.remove("open");
+      document.body.style.overflow = "";
+      setTimeout(() => { if (img) img.src = ""; }, 320);
+    };
+
+    const prev = () => {
+      currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+      img.src = currentImages[currentIndex];
+      updateCounter();
+    };
+
+    const next = () => {
+      currentIndex = (currentIndex + 1) % currentImages.length;
+      img.src = currentImages[currentIndex];
+      updateCounter();
+    };
+
+    const updateCounter = () => {
+      if (counter) counter.textContent = `${currentIndex + 1} / ${currentImages.length}`;
+    };
+
+    const init = () => {
+      const lbEl = document.getElementById("lightbox");
+      if (!lbEl) return;
+      document.getElementById("lb-close").addEventListener("click", close);
+      document.getElementById("lb-prev").addEventListener("click", prev);
+      document.getElementById("lb-next").addEventListener("click", next);
+      lbEl.addEventListener("click", e => { if (e.target === lbEl) close(); });
+      document.addEventListener("keydown", e => {
+        if (!lbEl.classList.contains("open")) return;
+        if (e.key === "Escape") close();
+        if (e.key === "ArrowLeft") next();
+        if (e.key === "ArrowRight") prev();
+      });
+    };
+
+    return { init, open, close };
+  })();
+
+  /* ======================================================================
+     PHOTO GALLERY MANAGER
+     ====================================================================== */
+  const PhotoGalleryManager = (() => {
+    let currentCat = null;
+
+    const buildCoverImages = () => {
+      Object.keys(GALLERY_DATA).forEach(key => {
+        const data = GALLERY_DATA[key];
+        const frontEl = document.getElementById(`gcat-front-${key}`);
+        const countEl = document.getElementById(`gcount-${key}`);
+        if (!frontEl) return;
+
+        if (countEl) {
+          countEl.textContent = data.images.length ? `${data.images.length} صورة` : "لا توجد صور بعد";
+        }
+
+        if (data.images.length > 0) {
+          const coverImg = document.createElement("img");
+          coverImg.src = data.path + data.images[0];
+          coverImg.alt = data.label;
+          coverImg.className = "gcat-cover";
+          frontEl.insertBefore(coverImg, frontEl.firstChild);
+        } else {
+          frontEl.classList.add("empty-cat");
+          const msg = document.createElement("div");
+          msg.className = "gcat-empty-msg";
+          msg.innerHTML = `<span class="empty-icon">🖼️</span>ستُضاف الصور قريباً`;
+          frontEl.insertBefore(msg, frontEl.querySelector(".gcat-front-overlay"));
+        }
+      });
+    };
+
+    const openCategory = catKey => {
+      const data = GALLERY_DATA[catKey];
+      if (!data) return;
+      currentCat = catKey;
+
+      const wrap = document.getElementById(`gcat-${catKey}`);
+      if (!wrap) return;
+      wrap.classList.add("flipping");
+
+      setTimeout(() => {
+        document.querySelectorAll(".gcat-flip-wrap").forEach(el => {
+          if (el.id !== `gcat-${catKey}`) {
+            el.style.transition = "opacity 0.35s ease, transform 0.35s ease";
+            el.style.opacity = "0";
+            el.style.transform = "scale(0.9)";
+            el.style.pointerEvents = "none";
+          }
+        });
+
+        setTimeout(() => {
+          const catsEl = document.getElementById("photo-cats");
+          if (catsEl) catsEl.classList.add("g-hidden");
+
+          renderPhotoGrid(data);
+
+          const expanded = document.getElementById("photo-expanded");
+          if (expanded) expanded.classList.add("active");
+        }, 300);
+      }, 380);
+    };
+
+    const renderPhotoGrid = data => {
+      const iconEl  = document.getElementById("gexp-icon");
+      const titleEl = document.getElementById("gexp-title");
+      const countEl = document.getElementById("gexp-count");
+      const grid    = document.getElementById("photo-grid");
+
+      if (iconEl)  iconEl.textContent  = data.icon;
+      if (titleEl) titleEl.textContent = data.label;
+      if (countEl) countEl.textContent = `${data.images.length} صورة`;
+      if (!grid) return;
+
+      grid.innerHTML = "";
+
+      if (data.images.length === 0) {
+        grid.innerHTML = `<div class="gallery-empty-state"><span class="empty-big-icon">🖼️</span><p>لا توجد صور في هذه الفئة بعد.</p></div>`;
+        return;
+      }
+
+      const allPaths = data.images.map(f => data.path + f);
+
+      data.images.forEach((file, idx) => {
+        const item = document.createElement("div");
+        item.className = "gallery-photo-item";
+
+        const img = document.createElement("img");
+        img.src = data.path + file;
+        img.alt = `${data.label} - ${idx + 1}`;
+        img.loading = "lazy";
+
+        const overlay = document.createElement("div");
+        overlay.className = "photo-hover-overlay";
+
+        const zoomIcon = document.createElement("span");
+        zoomIcon.className = "photo-zoom-icon";
+        zoomIcon.textContent = "🔍";
+        overlay.appendChild(zoomIcon);
+
+        item.appendChild(img);
+        item.appendChild(overlay);
+        item.addEventListener("click", () => LightboxManager.open(allPaths, idx));
+
+        grid.appendChild(item);
+      });
+    };
+
+    const closeCategory = () => {
+      const expanded = document.getElementById("photo-expanded");
+      if (expanded) expanded.classList.remove("active");
+
+      const catsEl = document.getElementById("photo-cats");
+      if (catsEl) catsEl.classList.remove("g-hidden");
+
+      document.querySelectorAll(".gcat-flip-wrap").forEach(el => {
+        el.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+        el.style.opacity = "1";
+        el.style.transform = "";
+        el.style.pointerEvents = "";
+      });
+
+      if (currentCat) {
+        const wrap = document.getElementById(`gcat-${currentCat}`);
+        if (wrap) wrap.classList.remove("flipping");
+      }
+      currentCat = null;
+      const grid = document.getElementById("photo-grid");
+      if (grid) grid.innerHTML = "";
+    };
+
+    const init = () => {
+      buildCoverImages();
+      document.querySelectorAll(".gcat-flip-wrap").forEach(el => {
+        el.addEventListener("click", () => openCategory(el.getAttribute("data-cat")));
+        el.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openCategory(el.getAttribute("data-cat"));
+          }
+        });
+      });
+      const closeBtn = document.getElementById("photo-close-btn");
+      if (closeBtn) closeBtn.addEventListener("click", closeCategory);
+    };
+
+    return { init };
+  })();
+
+  /* ======================================================================
+     PROMO GALLERY MANAGER
+     ====================================================================== */
+  const PromoGalleryManager = (() => {
+    let currentPcat = null;
+    let activeVideos = [];
+
+    const buildPromoCounts = () => {
+      Object.keys(PROMO_DATA).forEach(key => {
+        const data = PROMO_DATA[key];
+        const countEl = document.getElementById(`pvcount-${key}`);
+        if (countEl) {
+          countEl.textContent = data.videos.length ? `${data.videos.length} مقطع` : "لا توجد مقاطع بعد";
+        }
+      });
+    };
+
+    const openCategory = pcatKey => {
+      const data = PROMO_DATA[pcatKey];
+      if (!data) return;
+      currentPcat = pcatKey;
+
+      const wrap = document.querySelector(`[data-pcat="${pcatKey}"]`);
+      if (wrap) wrap.classList.add("flipping");
+
+      setTimeout(() => {
+        document.querySelectorAll(".pcat-flip-wrap").forEach(el => {
+          if (el.getAttribute("data-pcat") !== pcatKey) {
+            el.style.transition = "opacity 0.35s ease, transform 0.35s ease";
+            el.style.opacity = "0";
+            el.style.transform = "scale(0.9)";
+            el.style.pointerEvents = "none";
+          }
+        });
+
+        setTimeout(() => {
+          const catsEl = document.getElementById("promo-cats");
+          if (catsEl) catsEl.classList.add("p-hidden");
+
+          renderVideoGrid(data);
+
+          const expanded = document.getElementById("promo-expanded");
+          if (expanded) expanded.classList.add("active");
+        }, 300);
+      }, 380);
+    };
+
+    const renderVideoGrid = data => {
+      const titleEl = document.getElementById("pexp-title");
+      const countEl = document.getElementById("pexp-count");
+      const grid    = document.getElementById("promo-grid");
+
+      if (titleEl) titleEl.textContent = data.label;
+      if (countEl) countEl.textContent = `${data.videos.length} مقطع`;
+      if (!grid) return;
+
+      grid.innerHTML = "";
+      activeVideos = [];
+
+      if (data.videos.length === 0) {
+        grid.innerHTML = `<div class="promo-empty-state"><span class="empty-vid-icon">🎬</span><p>لا توجد مقاطع في هذه الفئة بعد.</p></div>`;
+        return;
+      }
+
+      data.videos.forEach((vid, idx) => {
+        const card = document.createElement("div");
+        card.className = "video-card";
+
+        const playerWrap = document.createElement("div");
+        playerWrap.className = "video-player-wrap";
+
+        const video = document.createElement("video");
+        video.src = data.path + vid.file;
+        video.controls = true;
+        video.preload = "metadata";
+        video.setAttribute("playsinline", "");
+
+        const overlay = document.createElement("div");
+        overlay.className = "video-play-overlay";
+
+        const playBtn = document.createElement("div");
+        playBtn.className = "video-play-btn-big";
+        playBtn.textContent = "▶";
+        overlay.appendChild(playBtn);
+
+        overlay.addEventListener("click", () => {
+          overlay.classList.add("playing");
+          video.play();
+        });
+        video.addEventListener("pause",  () => overlay.classList.remove("playing"));
+        video.addEventListener("ended",  () => overlay.classList.remove("playing"));
+        video.addEventListener("play",   () => {
+          activeVideos.forEach(v => { if (v !== video && !v.paused) v.pause(); });
+        });
+
+        activeVideos.push(video);
+        playerWrap.appendChild(video);
+        playerWrap.appendChild(overlay);
+
+        const info = document.createElement("div");
+        info.className = "video-info";
+
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "video-title";
+        titleDiv.textContent = vid.title || vid.file.replace(/\.[^.]+$/, "");
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "video-meta";
+        metaDiv.textContent = `${data.label} • ${idx + 1}/${data.videos.length}`;
+
+        info.appendChild(titleDiv);
+        info.appendChild(metaDiv);
+        card.appendChild(playerWrap);
+        card.appendChild(info);
+        grid.appendChild(card);
+      });
+    };
+
+    const closeCategory = () => {
+      activeVideos.forEach(v => { if (!v.paused) v.pause(); });
+      activeVideos = [];
+
+      const expanded = document.getElementById("promo-expanded");
+      if (expanded) expanded.classList.remove("active");
+
+      const catsEl = document.getElementById("promo-cats");
+      if (catsEl) catsEl.classList.remove("p-hidden");
+
+      document.querySelectorAll(".pcat-flip-wrap").forEach(el => {
+        el.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+        el.style.opacity = "1";
+        el.style.transform = "";
+        el.style.pointerEvents = "";
+      });
+
+      if (currentPcat) {
+        const sel = document.querySelector(`[data-pcat="${currentPcat}"]`);
+        if (sel) sel.classList.remove("flipping");
+      }
+      currentPcat = null;
+      const grid = document.getElementById("promo-grid");
+      if (grid) grid.innerHTML = "";
+    };
+
+    const init = () => {
+      buildPromoCounts();
+      document.querySelectorAll(".pcat-flip-wrap").forEach(el => {
+        el.addEventListener("click", () => openCategory(el.getAttribute("data-pcat")));
+        el.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openCategory(el.getAttribute("data-pcat"));
+          }
+        });
+      });
+      const closeBtn = document.getElementById("promo-close-btn");
+      if (closeBtn) closeBtn.addEventListener("click", closeCategory);
+    };
+
+    return { init };
+  })();
+
+  /* Init all gallery managers */
+  LightboxManager.init();
+  PhotoGalleryManager.init();
+  PromoGalleryManager.init();
+
 });

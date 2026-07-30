@@ -138,6 +138,14 @@
             <i class="fa-solid fa-photo-film"></i>
             <span data-i18n="nav.portfolio">معرض الأعمال</span>
           </a>
+          <a href="#photo-gallery" class="nav-link">
+            <i class="fa-solid fa-images"></i>
+            <span>معرض الصور</span>
+          </a>
+          <a href="#promo-gallery" class="nav-link">
+            <i class="fa-solid fa-clapperboard"></i>
+            <span>البرومو</span>
+          </a>
           <a href="#packages" class="nav-link">
             <i class="fa-solid fa-tags"></i>
             <span data-i18n="nav.packages">الباقات والأسعار</span>
@@ -875,6 +883,192 @@
           </div>
         </div>
       </section>
+
+      <!-- ================================================================ -->
+      <!-- PHOTO GALLERY SECTION — معرض الصور                              -->
+      <!-- ================================================================ -->
+      <section class="photo-gallery-section section-padding" id="photo-gallery">
+        <div class="container">
+          <div class="section-header text-center">
+            <span class="section-badge">
+              <i class="fa-solid fa-images text-gold"></i>
+              <span>معرض الصور</span>
+            </span>
+            <h2 class="section-title">أعمالنا التصويرية</h2>
+            <p class="section-subtitle">اضغط على الفئة لعرض جميع الصور</p>
+          </div>
+
+          <!-- Category Cards -->
+          <div class="gallery-categories" id="photo-cats">
+
+            <!-- ملكة -->
+            <div class="gcat-flip-wrap" id="gcat-malika" data-cat="malika"
+                 role="button" tabindex="0" aria-label="فتح فئة ملكة">
+              <div class="gcat-flipper">
+                <div class="gcat-front" id="gcat-front-malika">
+                  <div class="gcat-front-overlay">
+                    <span class="gcat-icon">👑</span>
+                    <span class="gcat-name">ملكة</span>
+                    <span class="gcat-count" id="gcount-malika"></span>
+                    <span class="gcat-hint">▶ اضغط لعرض الصور</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- صور عرسان -->
+            <div class="gcat-flip-wrap" id="gcat-arsan" data-cat="arsan"
+                 role="button" tabindex="0" aria-label="فتح فئة صور عرسان">
+              <div class="gcat-flipper">
+                <div class="gcat-front" id="gcat-front-arsan">
+                  <div class="gcat-front-overlay">
+                    <span class="gcat-icon">💍</span>
+                    <span class="gcat-name">صور عرسان</span>
+                    <span class="gcat-count" id="gcount-arsan"></span>
+                    <span class="gcat-hint">▶ اضغط لعرض الصور</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- حفل زفاف -->
+            <div class="gcat-flip-wrap" id="gcat-hafla" data-cat="hafla"
+                 role="button" tabindex="0" aria-label="فتح فئة حفل زفاف">
+              <div class="gcat-flipper">
+                <div class="gcat-front" id="gcat-front-hafla">
+                  <div class="gcat-front-overlay">
+                    <span class="gcat-icon">💒</span>
+                    <span class="gcat-name">حفل زفاف</span>
+                    <span class="gcat-count" id="gcount-hafla"></span>
+                    <span class="gcat-hint">▶ اضغط لعرض الصور</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /gallery-categories -->
+
+          <!-- Expanded Photo View -->
+          <div class="gallery-expanded" id="photo-expanded">
+            <div class="gallery-expanded-header">
+              <div class="gallery-expanded-title">
+                <span class="gcat-icon-lg" id="gexp-icon"></span>
+                <div>
+                  <h3 id="gexp-title"></h3>
+                  <span class="gcat-total" id="gexp-count"></span>
+                </div>
+              </div>
+              <button class="gallery-close-btn" id="photo-close-btn" aria-label="إغلاق">✕</button>
+            </div>
+            <div class="gallery-photo-grid" id="photo-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- PROMO GALLERY SECTION — معرض البرومو                            -->
+      <!-- ================================================================ -->
+      <section class="promo-gallery-section section-padding" id="promo-gallery">
+        <div class="container">
+          <div class="section-header text-center">
+            <span class="section-badge">
+              <i class="fa-solid fa-clapperboard text-gold"></i>
+              <span>معرض البرومو</span>
+            </span>
+            <h2 class="section-title">أعمالنا المرئية</h2>
+            <p class="section-subtitle">اضغط على الفئة لمشاهدة المقاطع</p>
+          </div>
+
+          <!-- Promo Category Cards -->
+          <div class="promo-categories" id="promo-cats">
+
+            <!-- إعلانات -->
+            <div class="pcat-flip-wrap" data-pcat="e3lanat"
+                 role="button" tabindex="0" aria-label="فتح فئة إعلانات">
+              <div class="pcat-flipper">
+                <div class="pcat-front" id="pcat-front-e3lanat">
+                  <div class="pcat-thumb-placeholder"><div class="play-ring">▶</div></div>
+                  <div class="pcat-front-overlay">
+                    <span class="pcat-name">إعلانات</span>
+                    <span class="pcat-vid-count" id="pvcount-e3lanat"></span>
+                    <span class="pcat-hint">▶ عرض المقاطع</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- حفل زفاف -->
+            <div class="pcat-flip-wrap" data-pcat="hafla_zafaf"
+                 role="button" tabindex="0" aria-label="فتح فئة حفل زفاف">
+              <div class="pcat-flipper">
+                <div class="pcat-front" id="pcat-front-hafla_zafaf">
+                  <div class="pcat-thumb-placeholder"><div class="play-ring">▶</div></div>
+                  <div class="pcat-front-overlay">
+                    <span class="pcat-name">حفل زفاف</span>
+                    <span class="pcat-vid-count" id="pvcount-hafla_zafaf"></span>
+                    <span class="pcat-hint">▶ عرض المقاطع</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- كبار الشخصيات -->
+            <div class="pcat-flip-wrap" data-pcat="kibar_shakhsiyat"
+                 role="button" tabindex="0" aria-label="فتح فئة كبار الشخصيات">
+              <div class="pcat-flipper">
+                <div class="pcat-front" id="pcat-front-kibar_shakhsiyat">
+                  <div class="pcat-thumb-placeholder"><div class="play-ring">▶</div></div>
+                  <div class="pcat-front-overlay">
+                    <span class="pcat-name">كبار الشخصيات</span>
+                    <span class="pcat-vid-count" id="pvcount-kibar_shakhsiyat"></span>
+                    <span class="pcat-hint">▶ عرض المقاطع</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- أفلام -->
+            <div class="pcat-flip-wrap" data-pcat="aflam"
+                 role="button" tabindex="0" aria-label="فتح فئة أفلام">
+              <div class="pcat-flipper">
+                <div class="pcat-front" id="pcat-front-aflam">
+                  <div class="pcat-thumb-placeholder"><div class="play-ring">▶</div></div>
+                  <div class="pcat-front-overlay">
+                    <span class="pcat-name">أفلام</span>
+                    <span class="pcat-vid-count" id="pvcount-aflam"></span>
+                    <span class="pcat-hint">▶ عرض المقاطع</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /promo-categories -->
+
+          <!-- Expanded Promo View -->
+          <div class="promo-expanded" id="promo-expanded">
+            <div class="gallery-expanded-header">
+              <div class="gallery-expanded-title">
+                <span class="gcat-icon-lg">🎬</span>
+                <div>
+                  <h3 id="pexp-title"></h3>
+                  <span class="gcat-total" id="pexp-count"></span>
+                </div>
+              </div>
+              <button class="gallery-close-btn" id="promo-close-btn" aria-label="إغلاق">✕</button>
+            </div>
+            <div class="promo-video-grid" id="promo-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIGHTBOX -->
+      <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="عرض الصورة">
+        <div class="lightbox-inner">
+          <img src="" alt="صورة مكبرة" id="lightbox-img" />
+        </div>
+        <button class="lightbox-close" id="lb-close" aria-label="إغلاق">✕</button>
+        <button class="lightbox-nav lightbox-prev" id="lb-prev" aria-label="السابق">›</button>
+        <button class="lightbox-nav lightbox-next" id="lb-next" aria-label="التالي">‹</button>
+        <div class="lightbox-counter" id="lb-counter"></div>
+      </div>
 
       <!-- PACKAGES & PRICING SECTION -->
       <section class="packages-section section-padding" id="packages">
