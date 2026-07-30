@@ -852,29 +852,29 @@ document.addEventListener("DOMContentLoaded", () => {
       label: "إعلانات",
       path: "promo/e3lanat/",
       videos: [
-        { file: "e3lanat 1.mp4", title: "إعلان 1" },
-        { file: "e3lanat 2.mp4", title: "إعلان 2" }
+        { file: "E3lanat 1.mp4", title: "إعلان 1" },
+        { file: "E3lanat 2.mp4", title: "إعلان 2" }
       ]
     },
     hafla_zafaf: {
       label: "حفل زفاف",
       path: "promo/hafla_zafaf/",
       videos: [
-        { file: "arkan.mov", title: "فيلم أركان - حفل زفاف" }
+        { file: "Arkan.mp4", title: "فيلم أركان - حفل زفاف" }
       ]
     },
     kibar_shakhsiyat: {
       label: "كبار الشخصيات",
       path: "promo/kibar_shakhsiyat/",
       videos: [
-        { file: "dr Ibrahim.mp4", title: "د. إبراهيم" }
+        { file: "Dr Ibrahim.mp4", title: "د. إبراهيم" }
       ]
     },
     aflam: {
       label: "أفلام",
       path: "promo/aflam/",
       videos: [
-        { file: "aflam.mp4", title: "فيلم أركان ميديا" }
+        { file: "Aflam.mp4", title: "فيلم أركان ميديا" }
       ]
     }
   };
@@ -1160,7 +1160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         playerWrap.className = "video-player-wrap";
 
         const video = document.createElement("video");
-        video.src = data.path + vid.file;
+        video.src = encodeURI(data.path + vid.file);
         video.controls = true;
         video.preload = "metadata";
         video.setAttribute("playsinline", "");
